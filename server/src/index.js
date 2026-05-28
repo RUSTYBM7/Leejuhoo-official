@@ -47,6 +47,112 @@ const sanitizeInput = (str) => {
   return str.trim().slice(0, 1000);
 };
 
+// POST /api/role-accept - Send role acceptance email (for Kathy)
+app.post('/api/role-accept', limiter, async (req, res) => {
+  try {
+    const { name, email, role } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !role) {
+      return res.status(400).json({
+        error: 'Name, email, and role are required.'
+      });
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        error: 'Invalid email format.'
+      });
+    }
+
+    // Prepare email content
+    const sanitizedName = sanitizeInput(name);
+    const sanitizedRole = sanitizeInput(role);
+
+    const mailOptions = {
+      from: `"Lee Juhoo Website" <${process.env.GMAIL_USER}>`,
+      to: process.env.GMAIL_USER,
+      replyTo: email,
+      subject: `🎉 Role Acceptance: ${sanitizedName} accepts ${sanitizedRole}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; text-align: center;">🎵 Lee Juhoo Official</h1>
+            <p style="color: #f0f0f0; text-align: center; margin: 10px 0 0;">Role Acceptance Notification</p>
+          </div>
+
+          <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #333; margin-top: 0;">Role Acceptance Confirmed</h2>
+
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Name:</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #333;">${sanitizedName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Email:</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #333;">${email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Accepted Role:</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #667eea; font-weight: bold;">${sanitizedRole}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Date:</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #333;">${new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</td>
+              </tr>
+            </table>
+
+            <div style="margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 8px;">
+              <p style="margin: 0; color: #2e7d32; font-size: 14px;">
+                ✅ Role acceptance notification received. Please process this request accordingly.
+              </p>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+            <p>© 2024 Lee Juhoo Official. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+      text: `
+        LEE JOOHOO OFFICIAL - ROLE ACCEPTANCE NOTIFICATION
+
+        Name: ${sanitizedName}
+        Email: ${email}
+        Accepted Role: ${sanitizedRole}
+        Date: ${new Date().toLocaleString()}
+
+        Please process this role acceptance request accordingly.
+      `
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
+    console.log(`✅ Role acceptance email sent for ${sanitizedName} - ${sanitizedRole}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Role acceptance confirmed successfully!'
+    });
+
+  } catch (error) {
+    console.error('Email error:', error);
+    res.status(500).json({
+      error: 'Failed to send confirmation. Please try again or contact us directly.'
+    });
+  }
+});
+
 // POST /api/confirm-role - Send role confirmation email
 app.post('/api/confirm-role', limiter, async (req, res) => {
   try {

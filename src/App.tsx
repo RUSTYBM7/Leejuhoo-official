@@ -742,157 +742,238 @@ function HomePage() {
 function NewsPage() {
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [selectedRole, setSelectedRole] = useState('Editor-in-Chief')
+  const [email, setEmail] = useState('')
+  const [activeFilter, setActiveFilter] = useState('all')
 
-  const liveHighlights = [
-    { id: 1, text: 'Lee Juhoo wins Best Actor at Baeksang Arts Awards 2026', time: '2 min ago', hot: true },
-    { id: 2, text: 'New album "Midnight Dreams" reaches 10M streams on Apple Music', time: '15 min ago', hot: true },
-    { id: 3, text: 'Global fan meet tour 2026 dates officially announced', time: '1 hour ago', hot: false },
-    { id: 4, text: 'Lee Juhoo appointed as luxury brand global ambassador', time: '3 hours ago', hot: false },
-    { id: 5, text: 'Behind the scenes: "Midnight Dreams" music video shoot', time: '5 hours ago', hot: false },
+  const newsArticles = [
+    { id: 1, title: 'Lee Juhoo wins Best Actor at Baeksang Arts Awards 2026', summary: 'Historic victory marks another milestone in his decorated career.', source: 'Soompi', category: 'Awards', time: '2 hours ago', hot: true },
+    { id: 2, title: 'New album "Midnight Dreams" reaches 10M streams', summary: 'Breaking records on multiple platforms simultaneously.', source: 'AllKpop', category: 'Music', time: '5 hours ago', hot: true },
+    { id: 3, title: 'World Tour 2026 dates officially announced', summary: '15 cities across 4 continents confirmed.', source: 'Official', category: 'Announcements', time: '1 day ago', hot: false },
+    { id: 4, title: 'Global brand partnership revealed', summary: 'Luxury fashion house announces exclusive collaboration.', source: 'Soompi', category: 'Acting', time: '2 days ago', hot: false },
   ]
 
-  const kathyRoles = [
-    { title: 'Editor-in-Chief', description: 'Leading all content creation, communications, and brand narrative.', icon: Star, color: '#fc3c44' },
-    { title: 'Personal Manager', description: 'Coordinating schedules, projects, and priorities.', icon: Calendar, color: '#ff9500' },
-    { title: 'Event Management Lead', description: 'Organizing and overseeing all events.', icon: Award, color: '#34c759' },
-    { title: 'Fan Relations Manager', description: 'Building and nurturing the global fan community.', icon: Users, color: '#5856d6' }
-  ]
+  const filters = ['All', 'Music', 'Acting', 'Awards', 'Announcements']
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitError('')
     try {
-      const response = await fetch('https://leejuhoo-server.onrender.com/api/confirm-role', {
+      const response = await fetch('https://leejuhoo-server.onrender.com/api/role-accept', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formData.name, email: formData.email, role: selectedRole, message: formData.message })
+        body: JSON.stringify({
+          name: 'Kathy',
+          email: email,
+          role: 'Editor / Personal Manager — Event & Fan Operations'
+        })
       })
       if (!response.ok) throw new Error('Failed to send')
       setIsSubmitted(true)
-      setTimeout(() => { setShowConfirmation(false); setIsSubmitted(false); setFormData({ name: '', email: '', message: '' }) }, 3000)
+      setTimeout(() => { setShowConfirmation(false); setIsSubmitted(false); setEmail('') }, 5000)
     } catch { setSubmitError('Failed to send. Please try again.') }
     finally { setIsSubmitting(false) }
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-20 pb-24">
-      <div className="px-4 space-y-8">
+    <div className="min-h-screen bg-black text-white pt-24 pb-16">
+      <div className="max-w-6xl mx-auto px-6 space-y-8">
+        {/* Page Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Official News</h1>
-          <p className="text-white/60">Latest Updates & Announcements</p>
-        </div>
-
-        {/* Live Updates */}
-        <div className="bg-[#1c1c1e] rounded-2xl p-4 border border-white/[0.08]">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center justify-center gap-2 mb-2">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider">Live Updates</h3>
+            <span className="text-sm text-white/60 uppercase tracking-wider">Live Updates</span>
           </div>
-          <div className="space-y-3">
-            {liveHighlights.map((h) => (
-              <div key={h.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/5">
-                {h.hot && <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded">HOT</span>}
-                <div className="flex-1">
-                  <p className="text-white text-sm">{h.text}</p>
-                  <p className="text-white/40 text-xs mt-1 flex items-center gap-1"><Clock size={10} /> {h.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Kathy Announcement */}
-        <div className="bg-gradient-to-br from-[#fc3c44]/20 via-[#1c1c1e] to-[#ff9500]/20 rounded-3xl p-6 border border-[#fc3c44]/30">
-          <div className="text-center mb-6">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#fc3c44] to-[#ff9500] flex items-center justify-center">
-              <Star size={40} className="text-white" />
-            </div>
-            <span className="px-4 py-1 bg-[#fc3c44] text-white text-xs font-bold rounded-full uppercase tracking-wider">Official Announcement</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mt-4 mb-2">The Appointment of Kathy Hutchison</h2>
-            <p className="text-white/60 text-sm">A New Chapter in Lee Juhoo's Official Team</p>
-          </div>
-          <div className="bg-black/40 rounded-2xl p-4">
-            <h3 className="text-sm font-semibold text-[#fc3c44] uppercase tracking-wider mb-2">Her Relationship to Lee Juhoo</h3>
-            <p className="text-white/80 text-sm leading-relaxed">Kathy Hutchison has been an integral part of Lee Juhoo's journey, demonstrating exceptional dedication, insight, and passion for the artist's mission.</p>
-          </div>
-        </div>
-
-        {/* Roles */}
-        <div>
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Award size={24} className="text-[#fc3c44]" />Kathy Hutchison's Official Roles</h3>
-          <div className="grid gap-4">
-            {kathyRoles.map((role, i) => (
-              <div key={i} className="bg-[#1c1c1e] rounded-2xl p-5 border border-white/[0.08]">
-                <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${role.color}20` }}>
-                    <role.icon size={28} style={{ color: role.color }} />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-bold text-white mb-1">{role.title}</h4>
-                    <p className="text-white/60 text-sm">{role.description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Importance */}
-        <div className="bg-gradient-to-r from-[#fc3c44]/10 via-[#ff9500]/10 to-[#fc3c44]/10 rounded-2xl p-6 border border-[#fc3c44]/20">
-          <h3 className="text-xl font-bold text-white mb-4">The Immense Importance of This Role</h3>
-          <ul className="space-y-2">
-            {['Strategic thinking and meticulous attention to detail', 'Exceptional communication and interpersonal abilities', 'Unwavering dedication to both the artist and fan community'].map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-white/70 text-sm"><Check size={16} className="text-[#34c759] mt-0.5 flex-shrink-0" />{item}</li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Confirm Button */}
-        <div className="text-center">
-          <button onClick={() => setShowConfirmation(true)} className="px-8 py-4 bg-gradient-to-r from-[#fc3c44] to-[#ff9500] rounded-full text-white font-bold text-lg flex items-center gap-3 mx-auto hover:opacity-90 transition">
-            <Mail size={20} /> Confirm & Accept This Role
+          <h1 className="text-4xl font-bold mb-2">Latest News</h1>
+          <p className="text-white/60 mb-4">Real-time updates — refreshes every 5 minutes</p>
+          <button className="px-4 py-2 bg-white/10 rounded-full text-white/70 text-sm hover:bg-white/20 transition">
+            Refresh Now
           </button>
+        </div>
+
+        {/* Kathy Announcement Section */}
+        <div className="bg-gradient-to-br from-rose-500/20 via-[#1c1c1e] to-amber-500/20 rounded-3xl p-8 border border-rose-500/30">
+          <div className="text-center mb-8">
+            <span className="inline-block px-4 py-1 bg-rose-500 text-white text-sm font-bold rounded-full uppercase tracking-wider mb-4">
+              Official Team Announcement
+            </span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Introducing Kathy</h2>
+            <p className="text-xl text-amber-400 mb-6">Editor · Personal Manager · Head of Fan & Event Operations</p>
+          </div>
+
+          {/* Relationship Note */}
+          <div className="bg-black/40 rounded-2xl p-6 mb-8 border-l-4 border-rose-500">
+            <p className="text-white/80 leading-relaxed italic">
+              "This appointment reflects a deeply personal and professional trust. Kathy's relationship with this project goes beyond a title — she is central to every major decision, every fan interaction, and every public-facing moment this operation produces."
+            </p>
+          </div>
+
+          {/* Three Role Cards */}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+              <Star className="text-amber-400 mb-4" size={32} />
+              <h3 className="text-xl font-bold mb-3">Editor & Personal Manager</h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                Kathy holds full authority over all content direction, media approvals, scheduling, and personal management. Every editorial and communications decision passes through her.
+              </p>
+            </div>
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+              <Calendar className="text-rose-400 mb-4" size={32} />
+              <h3 className="text-xl font-bold mb-3">Event Management Director</h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                Complete ownership of all events — fan meets, concerts, media appearances, and private engagements. Kathy coordinates directly with venues, production teams, and press.
+              </p>
+            </div>
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+              <Users className="text-violet-400 mb-4" size={32} />
+              <h3 className="text-xl font-bold mb-3">Fan Community Manager</h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                Kathy is the direct liaison between Junho and the global fan community. She manages all official fan channels and represents fan interests to the core team.
+              </p>
+            </div>
+          </div>
+
+          {/* Accept Role Button */}
+          <div className="text-center">
+            <button
+              onClick={() => setShowConfirmation(true)}
+              className="px-8 py-4 bg-gradient-to-r from-rose-500 to-amber-500 rounded-full text-white font-bold text-lg hover:opacity-90 transition"
+            >
+              Kathy — Accept Your Role
+            </button>
+          </div>
+        </div>
+
+        {/* News Feed Section */}
+        <div>
+          <h3 className="text-2xl font-bold mb-6">News Feed</h3>
+
+          {/* Filter Bar */}
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+            {filters.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter.toLowerCase())}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
+                  activeFilter === filter.toLowerCase()
+                    ? 'bg-amber-500 text-black'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+
+          {/* News Article Cards */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {newsArticles.map((article) => (
+              <div key={article.id} className="bg-white/5 rounded-2xl p-5 border border-white/10 hover:border-amber-500/50 transition cursor-pointer">
+                <div className="flex items-start gap-3 mb-3">
+                  <span className={`px-2 py-1 text-xs font-bold rounded ${
+                    article.category === 'Awards' ? 'bg-amber-500/20 text-amber-400' :
+                    article.category === 'Music' ? 'bg-rose-500/20 text-rose-400' :
+                    article.category === 'Acting' ? 'bg-violet-500/20 text-violet-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    {article.category}
+                  </span>
+                  {article.hot && <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">HOT</span>}
+                </div>
+                <h4 className="font-bold mb-2 line-clamp-2">{article.title}</h4>
+                <p className="text-white/50 text-sm mb-3 line-clamp-2">{article.summary}</p>
+                <div className="flex items-center justify-between text-xs text-white/40">
+                  <span>{article.source}</span>
+                  <span>{article.time}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Modal */}
       {showConfirmation && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1c1c1e] rounded-3xl p-6 w-full max-w-md border border-white/[0.08]">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => !isSubmitting && setShowConfirmation(false)}>
+          <div className="bg-[#1c1c1e] rounded-3xl p-8 w-full max-w-md border border-white/10" onClick={(e) => e.stopPropagation()}>
             {!isSubmitted ? (
               <>
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#fc3c44] to-[#ff9500] flex items-center justify-center">
-                    <Check size={32} className="text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Role Confirmation</h3>
+                  <Check className="mx-auto mb-4 text-amber-400" size={48} />
+                  <h3 className="text-2xl font-bold mb-2">Accept Your Role</h3>
+                  <p className="text-white/60 text-sm">Enter your email to confirm your appointment and connect directly with the team.</p>
                 </div>
-                {submitError && <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl"><p className="text-red-400 text-sm text-center">{submitError}</p></div>}
+
+                {submitError && (
+                  <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl">
+                    <p className="text-red-400 text-sm text-center">{submitError}</p>
+                  </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Full Name" className="w-full bg-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/40 focus:outline-none" />
-                  <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="Email Address" className="w-full bg-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/40 focus:outline-none" />
-                  <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full bg-white/10 rounded-xl px-4 py-3 text-white focus:outline-none">
-                    {kathyRoles.map((r) => <option key={r.title} value={r.title} style={{ background: '#1c1c1e' }}>{r.title}</option>)}
-                  </select>
-                  <textarea value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})} placeholder="Message (Optional)" rows={3} className="w-full bg-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/40 focus:outline-none resize-none" />
-                  <div className="flex gap-3">
-                    <button type="button" onClick={() => { setShowConfirmation(false); setSubmitError(''); }} className="flex-1 px-4 py-3 bg-white/10 rounded-xl text-white/70 font-medium">Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-3 bg-gradient-to-r from-[#fc3c44] to-[#ff9500] rounded-xl text-white font-bold flex items-center justify-center gap-2 disabled:opacity-50">
-                      {isSubmitting ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Sending...</> : <><Send size={16} /> Submit</>}
+                  <div>
+                    <label className="block text-white/60 text-sm mb-2">Name</label>
+                    <input
+                      type="text"
+                      value="Kathy"
+                      readOnly
+                      className="w-full bg-white/5 rounded-xl px-4 py-3 text-white/40 border border-white/10 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white/60 text-sm mb-2">Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Your email address"
+                      className="w-full bg-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white/60 text-sm mb-2">Role</label>
+                    <input
+                      type="text"
+                      value="Editor / Personal Manager — Event & Fan Operations"
+                      readOnly
+                      className="w-full bg-white/5 rounded-xl px-4 py-3 text-white/40 border border-white/10 cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => { setShowConfirmation(false); setSubmitError(''); }}
+                      disabled={isSubmitting}
+                      className="flex-1 px-4 py-3 bg-white/10 rounded-xl text-white/70 font-medium hover:bg-white/20 transition disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || !email}
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-rose-500 to-amber-500 rounded-xl text-white font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        'Confirm & Connect'
+                      )}
                     </button>
                   </div>
                 </form>
               </>
             ) : (
               <div className="text-center py-8">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#34c759]/20 flex items-center justify-center"><Check size={40} className="text-[#34c759]" /></div>
-                <h3 className="text-2xl font-bold text-white mb-2">Confirmation Sent!</h3>
-                <p className="text-white/60 text-sm">Your role confirmation has been sent to the team.</p>
+                <Check className="mx-auto mb-4 text-green-400" size={64} />
+                <h3 className="text-2xl font-bold mb-2">Role Accepted</h3>
+                <p className="text-white/60">The team has been notified. Expect contact within 24 hours.</p>
               </div>
             )}
           </div>
